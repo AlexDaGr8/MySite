@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;300;400;500;600;700;800;900&display=swap");
+#app, input, button {
+  font-family: "Inconsolata", monospace;
+  font-size: 1.2em;
+}
+#app h1, input h1, button h1 {
+  text-align: center;
+}
+#app input, #app button, input input, input button, button input, button button {
+  font-size: 1em;
+}
+.text-center {
+    text-align: center;
+}
+.grid {
+  width: 90vw;
+  margin: 5% auto;
+}
+.grid .row {
+  display: grid;
+  grid-gap: 5px;
+  width: 100%;
+  margin: 5px 0;
+}
+.grid .row.column-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+.grid .row .span-1 {
+  grid-column: span 1;
+}
+.grid .row .span-1.offset-1 {
+  grid-column: 1/span 1;
+}
+.grid .row .span-1.offset-2 {
+  grid-column: 2/span 1;
+}
+.grid .row .span-1.offset-3 {
+  grid-column: 3/span 1;
+}
+.grid .row .span-1.offset-4 {
+  grid-column: 4/span 1;
+}
+.grid .row .span-1.offset-5 {
+  grid-column: 5/span 1;
+}
+.grid .row .span-1.offset-6 {
+  grid-column: 6/span 1;
+}
+.grid .row.column-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.grid .row .span-2 {
+  grid-column: span 2;
+}
+.grid .row .span-2.offset-1 {
+  grid-column: 1/span 2;
+}
+.grid .row .span-2.offset-2 {
+  grid-column: 2/span 2;
+}
+.grid .row .span-2.offset-3 {
+  grid-column: 3/span 2;
+}
+.grid .row .span-2.offset-4 {
+  grid-column: 4/span 2;
+}
+.grid .row .span-2.offset-5 {
+  grid-column: 5/span 2;
+}
+.grid .row .span-2.offset-6 {
+  grid-column: 6/span 2;
+}
+.grid .row.column-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid .row .span-3 {
+  grid-column: span 3;
+}
+.grid .row .span-3.offset-1 {
+  grid-column: 1/span 3;
+}
+.grid .row .span-3.offset-2 {
+  grid-column: 2/span 3;
+}
+.grid .row .span-3.offset-3 {
+  grid-column: 3/span 3;
+}
+.grid .row .span-3.offset-4 {
+  grid-column: 4/span 3;
+}
+.grid .row .span-3.offset-5 {
+  grid-column: 5/span 3;
+}
+.grid .row .span-3.offset-6 {
+  grid-column: 6/span 3;
+}
+.grid .row.column-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid .row .span-4 {
+  grid-column: span 4;
+}
+.grid .row .span-4.offset-1 {
+  grid-column: 1/span 4;
+}
+.grid .row .span-4.offset-2 {
+  grid-column: 2/span 4;
+}
+.grid .row .span-4.offset-3 {
+  grid-column: 3/span 4;
+}
+.grid .row .span-4.offset-4 {
+  grid-column: 4/span 4;
+}
+.grid .row .span-4.offset-5 {
+  grid-column: 5/span 4;
+}
+.grid .row .span-4.offset-6 {
+  grid-column: 6/span 4;
+}
+.grid .row.column-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.grid .row .span-5 {
+  grid-column: span 5;
+}
+.grid .row .span-5.offset-1 {
+  grid-column: 1/span 5;
+}
+.grid .row .span-5.offset-2 {
+  grid-column: 2/span 5;
+}
+.grid .row .span-5.offset-3 {
+  grid-column: 3/span 5;
+}
+.grid .row .span-5.offset-4 {
+  grid-column: 4/span 5;
+}
+.grid .row .span-5.offset-5 {
+  grid-column: 5/span 5;
+}
+.grid .row .span-5.offset-6 {
+  grid-column: 6/span 5;
+}
+.grid .row.column-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+.grid .row .span-6 {
+  grid-column: span 6;
+}
+.grid .row .span-6.offset-1 {
+  grid-column: 1/span 6;
+}
+.grid .row .span-6.offset-2 {
+  grid-column: 2/span 6;
+}
+.grid .row .span-6.offset-3 {
+  grid-column: 3/span 6;
+}
+.grid .row .span-6.offset-4 {
+  grid-column: 4/span 6;
+}
+.grid .row .span-6.offset-5 {
+  grid-column: 5/span 6;
+}
+.grid .row .span-6.offset-6 {
+  grid-column: 6/span 6;
+}
+.grid .row .label {
+  text-align: right;
+  align-self: center;
+}
+.grid .row button {
+  width: 100%;
+  appearance: none;
+  outline: none;
+  border: solid 1px;
+  border-radius: 3px;
+  padding: 4px 0;
+  background: #f0f0f0;
+  position: relative;
+  transform: translate(1px, 0px);
+  transition: all 0.1s linear;
+}
+.grid .row button:active {
+  transform: translate(-1px, 1px);
+}
+.grid .row button:hover {
+  background: rgba(240, 240, 240, 0.7);
+}
+.grid .row input {
+  width: 75%;
+}
+
+.hidden {
+  display: none;
+}

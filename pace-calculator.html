@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Pace Calculator</h1>
+        <div class="grid">
+            <div class="row column-5">
+              <div class="label">Time:</div>
+              <div>
+                <input
+                       @change="updateLastModified('time')"  
+                       type="number" 
+                       v-model="time.hours" 
+                       placeholder="hour"
+                />:
+              </div>
+              <div>
+                <input
+                       @change="updateLastModified('time')"  
+                       type="number" 
+                       v-model="time.minutes" 
+                       placeholder="min"
+                       min="0"
+                       max="59"
+                />:
+              </div>
+              <div>
+                <input
+                       @change="updateLastModified('time')"  
+                       type="number" 
+                       v-model="time.seconds" 
+                       placeholder="sec"
+                       min="0"
+                       max="59"
+                />
+              </div>
+            </div>
+            <div class="row column-5">
+              <div class="label">Distance:</div>
+              <div>
+                <input
+                       @change="updateLastModified('distance')" 
+                       type="number" 
+                       v-model="distance.value" 
+                       placeholder="dist"
+                       class="distance"
+                />
+              </div>
+              <div>
+                <label>Units:</label>
+                <select v-model="distance.units" @change="updateUnits()">
+                  <option>Mi</option>
+                  <option>Km</option>
+                </select>
+              </div>
+              <div>
+                <select v-model="distance.race" @change="updateRace()">
+                  <option></option>
+                  <option value="marathon">Marathon</option>
+                  <option value="halfMarathon">Half Marathon</option>
+                  <option value="tenK">10k</option>
+                  <option value="fiveK">5k</option>
+                </select>
+              </div>
+            </div>
+            <div class="row column-5">
+              <div class="label">Pace:</div>
+              <div>
+                <input 
+                       @change="updateLastModified('pace')" 
+                       type="number" 
+                       v-model="pace.hours" 
+                       placeholder="hour"
+                />:
+              </div>
+              <div>
+                <input 
+                       @change="updateLastModified('pace')" 
+                       type="number" 
+                       v-model="pace.minutes" 
+                       placeholder="min"
+                       min="0"
+                       max="59"
+                />:
+              </div>
+              <div>
+                <input 
+                       @change="updateLastModified('pace')" 
+                       type="number" 
+                       v-model="pace.seconds" 
+                       placeholder="sec"
+                       min="0"
+                       max="59"
+                />
+              </div>
+              <div>per {{ distance.units }}</div>
+            </div>
+          <div class="row column-6">
+            <div class="span-2 offset-2">
+              <button @click="calculate()">Calculate</button>
+            </div>
+            <div class="span-2">
+              <button @click="reset()">Reset</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid">
+            <div v-for="result of results" class="row column-6">
+                
+                <div class="span-2 offset-2 text-center">
+                    {{ result }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js"></script>
+    <script>
+        function Time() {
+            this.hours = NaN;
+            this.minutes = NaN;
+            this.seconds = NaN;
+            this.any = function() {
+                return (!!this.hours || !!this.minutes || !!this.seconds);
+            },
+            this.toSeconds = function() {
+                const hrs = !isNaN(this.hours) ? this.hours * 60 * 60 : 0;
+                const mins = !isNaN(this.minutes) ? this.minutes * 60 : 0;
+                const secs = !isNaN(this.seconds) ? this.seconds : 0;
+                return +hrs + +mins + +secs;
+            }
+            this.fromSeconds = function(seconds) {
+                const hrs = seconds / (60 * 60);
+                const mins = (hrs % 1) * 60;
+                const secs = (mins % 1) * 60;
+                this.hours = Math.floor(hrs).toString().padStart(2,'0');
+                this.minutes = Math.floor(mins).toString().padStart(2,'0');
+                this.seconds = Math.floor(secs).toString().padStart(2,'0');
+            }
+            this.reset = function() {
+                this.hours = NaN;
+                this.minutes = NaN;
+                this.seconds = NaN;
+            }
+        }
+
+        const races = {
+            'marathon': 42.195,
+            'halfMarathon': 21.0975,
+            'fiveK': 5,
+            'tenK': 10,
+        };
+
+        const vue = new Vue({ 
+            el: '#app',
+            data () {
+                return {
+                    time: new Time(),
+                    distance: {
+                        value: NaN,
+                        units: 'Mi',
+                        race: ''
+                    },
+                    pace: new Time(),
+                    lastModified: [],
+                    results: ['test','test']
+                }
+            },
+            methods: {
+                round(num) {
+                    return Math.round((num + Number.EPSILON) * 100) / 100
+                },
+                toKm(mi) {
+                    return this.round(mi * 1.609);
+                },
+                toMiles(km) {
+                    return this.round(km / 1.609);
+                },
+                calculate() {
+                    if (this.lastModified.includes('distance') && this.lastModified.includes('time')) {
+                        this.updatePace();
+                    }
+                    if (this.lastModified.includes('distance') && this.lastModified.includes('pace')) {
+                        this.updateTime();
+                    }
+                    if (this.lastModified.includes('pace') && this.lastModified.includes('time')) {
+                        this.updateDistance();
+                    }
+                },
+                updateTime() {
+                    const seconds = this.pace.toSeconds();
+                    this.time.fromSeconds(seconds * this.distance.value);
+                },
+                updateDistance() {
+                    this.distance.value = this.time.toSeconds() / this.pace.toSeconds();
+                },
+                updatePace() {
+                    const seconds = this.time.toSeconds();
+                    this.pace.fromSeconds(seconds / this.distance.value);
+                },
+                updateLastModified(str) {
+                    if (!this.lastModified.includes(str)) {
+                        this.lastModified.unshift(str)
+                    }
+                    if (this.lastModified.length > 2) {
+                        this.lastModified.pop();
+                    }
+                },
+                updateUnits() {
+                    const distance = this.distance.value;
+                    if (this.distance.units === 'Km') {
+                        this.distance.value = this.toKm(distance);
+                        this.updatePace();
+                    } else {
+                        this.distance.value = this.toMiles(distance);
+                        this.updatePace();
+                    }
+                },
+                updateRace() {
+                    const raceK = races[this.distance.race];
+                    if (this.distance.units === 'Km') {
+                        this.distance.value = raceK;
+                    } else {
+                        this.distance.value = this.toMiles(raceK);
+                    }
+                    this.updateLastModified('distance');
+                },
+                reset() {
+                    this.pace.reset();
+                    this.time.reset();
+                    this.distance.value = NaN;
+                    this.lastModified = [];
+                }
+            }
+        });
+    </script>
+</body>
+</html>
