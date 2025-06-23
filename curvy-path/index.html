@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <style>
+        .container {
+            width: auto;
+            max-height: 60vh;
+            aspect-ratio: 8 / 5;
+            margin: 3rem auto;
+        }
+    </style>
+    <p><b>Click</b> on a point to select it, then move it to your desired location and click again to unselect.</p>
+    <p>
+        <b>Double click</b> on a point to delete that point or,
+        <br>
+        <b>Double click</b> on the empty space to add a point then:
+        <ul>
+            <li><b>Click</b> to set the position of the main point</li>
+            <li><b>Click</b> one more time set the position of the control point point</li>
+        </ul>
+    </p>
+    <button id="save">Save to local storage</button>
+    <button id="reset">Reset to local storage</button>
+    <div class="container" id="container">
+        <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
+    </div>
+    <script>
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let points = [
+                new Point(3, 2, { x: 2, y: 4 }),
+                new Point(2, 6, { x: 7, y: 6 }),
+                new Point(9, 8, { x: 9, y: 7 }),
+                new Point(8, 5, { x: 7, y: 5 }),
+                new Point(6, 5, { x: 6, y: 6 })
+            ];
+        let { width, height } = containerBBox();
+        let scaleX = Scale([0, 10], [0, width]);
+        let scaleY = Scale([0, 10], [height, 0]);
+        let scaleXRev = Scale([0, width], [0, 10]);
+        let scaleYRev = Scale([height, 0], [0, 10]);
+        let movePoint = undefined;
+        let newPoint = false;
+
+        void function() {
+            const localStrg = localStorage.getItem('points');
+            const strgPoints = JSON.parse(localStrg);
+
+            if (strgPoints) {
+                points = [];
+                console.log('we got points', strgPoints);
+
+                for (let point of strgPoints) {
+                    points.push(new Point(point.x, point.y, point.controlPoint))
+                }
+            }
+        }();
+
+        canvas.width = width;
+        canvas.height = height;
+
+        draw();
+
+        window.onresize = () => {
+            ctx.clearRect(-10, -10, width + 10, height + 10);
+
+            width = containerBBox().width;
+            height = containerBBox().height;
+            scaleX = Scale([0, 10], [0, width]);
+            scaleY = Scale([0, 10], [height, 0]);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            draw();
+        }
+
+        document.getElementById('save').addEventListener('click', () => {
+            localStorage.setItem('points', JSON.stringify(points));
+        });
+        document.getElementById('reset').addEventListener('click', () => {
+            localStorage.removeItem('points');
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            const mousePos = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+
+            circle(mousePos, 3, 'yellow');
+
+            if (movePoint) {
+                if (newPoint) {
+                    movePoint = movePoint.controlPoint;
+
+                    newPoint = false;
+
+                    return;
+                }
+
+                movePoint = undefined;
+                return;
+            }
+
+            for (let p of points) {
+                if (isIntersecting(mousePos, p)) {
+                    movePoint = p;
+                    return; 
+                }
+                if (isIntersecting(mousePos, p.controlPoint)) {
+                    movePoint = p.controlPoint;
+                    return;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (movePoint) {
+                const mousePos = {
+                    x: e.offsetX,
+                    y: e.offsetY
+                };
+
+                circle(mousePos, 3, 'yellow');
+
+                movePoint.x = scaleXRev(mousePos.x);
+                movePoint.y = scaleYRev(mousePos.y);
+            }
+        });
+
+        canvas.addEventListener('dblclick', (e) => {
+            if (movePoint) return;
+
+            const mousePos = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+
+            for (let p of points) {
+                if (isIntersecting(mousePos, p) || isIntersecting(mousePos, p.controlPoint)) {
+                    const arrIdx = points.findIndex(pnt => pnt.id === p.id);
+
+                    points.splice(arrIdx, 1);
+
+                    draw();
+
+                    return; 
+                }
+            }
+
+            circle(mousePos, 3, 'yellow');
+
+            movePoint = new Point(scaleXRev(mousePos.x), scaleYRev(mousePos.y), { x: 0, y: 0 });
+
+            points.push(movePoint);
+
+            newPoint = true;
+
+            draw();
+        });
+
+        function containerBBox() {
+            const container = document.getElementById('container');
+            const { width, height } = container.getBoundingClientRect();
+
+            return { width, height };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.beginPath();
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = '#777';
+            ctx.fill();
+
+            for (let point of points) {
+                circle({ x: scaleX(point.x), y: scaleY(point.y) }, point.r, 'steelblue');
+                circle({ x: scaleX(point.controlPoint.x), y: scaleY(point.controlPoint.y) }, point.controlPoint.r, 'salmon');
+            }
+
+            drawPath(points);
+        }
+
+        function circle({ x, y }, r, fill) {
+            ctx.beginPath();
+            ctx.arc(x,y,r,0,Math.PI * 2);
+
+            if (fill) {
+                ctx.fillStyle = fill;
+                ctx.fill();
+            }
+
+            ctx.closePath();
+        }
+
+        function drawPath(points) {
+            const first = points[0];
+
+            ctx.beginPath();
+            ctx.moveTo(scaleX(first.x), scaleY(first.y));
+
+            for (let i = 1; i < points.length; i++) {
+                const curP = points[i];
+                const prevP = points[i - 1];
+
+                ctx.quadraticCurveTo(
+                    scaleX(prevP.controlPoint.x), scaleY(prevP.controlPoint.y),
+                    scaleX(curP.x), scaleY(curP.y)
+                );
+            }
+
+            ctx.strokeStyle = 'hotpink';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        function Scale(domain, range) {
+            const _domain = domain;
+            const _range = range;
+
+            function doMath(input) {
+                const [dMin, dMax] = _domain;
+                const [rMin, rMax] = _range;
+                const percent = (input - dMin) / (dMax - dMin);
+                const output = percent * (rMax - rMin) + rMin;
+
+                return output;
+            }
+
+            return doMath;
+        }
+
+        function Point(x, y, control) {
+            const cp = new Proxy(
+                { ...control, r: 5, id: `cp-${Math.random().toFixed(4) * 10000}` },
+                {
+                    get(target, prop, receiver) {
+                        return target[prop];
+                    },
+                    set(obj, prop, value) {
+                        obj[prop] = value;
+
+                        draw();
+
+                        return true;
+                    }
+                }
+            );
+            const point = new Proxy(
+                { x, y, r: 10, controlPoint: cp, id: `p-${Math.random().toFixed(4) * 10000}` },
+                {
+                    get(target, prop, receiver) {
+                        return target[prop];
+                    },
+                    set(obj, prop, value) {
+                        if (prop === 'controlPoint') return false;
+
+                        obj[prop] = value;
+
+                        draw();
+
+                        return true;
+                    }
+                }
+            )
+
+            return point;
+        }
+
+        function isIntersecting(mouse, point) {
+            const xDiffSqr = (mouse.x - scaleX(point.x)) ** 2;
+            const yDiffSqr = (mouse.y - scaleY(point.y)) ** 2;
+            return Math.sqrt(xDiffSqr + yDiffSqr) < point.r;
+        }
+    </script>
+</body>
+</html>

@@ -6,6 +6,5 @@
 
 <script setup>
 import PhotoGallary from '@/components/PhotoGallary.vue';
-
 </script>
 
