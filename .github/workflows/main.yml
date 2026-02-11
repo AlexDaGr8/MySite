@@ -17,3 +17,4 @@ jobs:
         server: alexdagr8.com
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftps
