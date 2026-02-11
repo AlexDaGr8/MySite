@@ -14,7 +14,6 @@ jobs:
     - name: 📂 Sync fisles
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: alexdagr8.com
+        server: ftp.dtq.peg.mybluehost.me
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps
